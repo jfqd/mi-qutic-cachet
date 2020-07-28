@@ -1,0 +1,69 @@
+#!/usr/bin/bash
+
+PATH=/opt/local/gnu/bin:/opt/local/bin:/opt/local/sbin:/usr/bin:/usr/sbin
+
+# Exit if any command fail
+set -o errexit
+
+CACHET_VERSION="v2.3.18"
+DESTDIR="/var/www/htdocs"
+
+echo "* Remove unused httpd config files"
+HTTPD_CONF_RM="httpd-autoindex.conf
+httpd-dav.conf
+httpd-default.conf
+httpd-info.conf
+httpd-languages.conf
+httpd-manual.conf
+httpd-mpm.conf
+httpd-multilang-errordoc.conf
+httpd-ssl.conf
+httpd-userdir.conf
+httpd-vhosts.conf"
+
+for CONF_RM in ${HTTPD_CONF_RM}; do
+  rm -f /opt/local/etc/httpd/${CONF_RM}
+done
+
+echo "* Install Cachet"
+cd "${DESTDIR}"
+git clone https://github.com/cachethq/Cachet.git
+cd Cachet
+git checkout $CACHET_VERSION
+
+echo "* Setup Cachet"
+chown -R www:www "$DESTDIR"
+
+echo "* Activate munin plugins"
+/opt/qutic/bin/munin-node-plugins ${MUNIN_PLUGINS}
+
+# Configuring image specific packages
+echo "* Configuring image specific packages.";
+mkdir -p /var/log/httpd/old
+mkdir -p /opt/local/etc/httpd/ssl || true
+chmod 0640 /opt/local/etc/httpd/ssl
+ln -nfs /opt/local/etc/httpd/ssl /opt/local/etc/httpd/tls
+
+echo "* Setup proxysql";
+pkg_add https://download.qutic.com/extras/proxysql-1.4.7.tgz || true
+mkdir -p /opt/local/var/proxysql
+groupadd -g 130 proxysql
+useradd -m -s /usr/bin/false -d /opt/local/var/proxysql -u 130 -g proxysql proxysql
+chown proxysql:proxysql /opt/local/var/proxysql/
+mv /opt/local/etc/proxysql.cnf /opt/local/etc/proxysql.cnf.bak || true
+mv /opt/local/var/tmp/proxysql.cnf /opt/local/etc/proxysql.cnf
+chmod 0640 /opt/local/etc/proxysql.cnf
+chown root:proxysql /opt/local/etc/proxysql.cnf
+mv /opt/local/var/tmp/proxysql.xml /opt/local/lib/svc/manifest/proxysql.xml
+svccfg import /opt/local/lib/svc/manifest/proxysql.xml
+ln -nfs /var/svc/log/pkgsrc-proxysql:default.log /var/log/proxysql_log
+
+# echo "* Enable ipfilter"
+# svcadm enable svc:/network/ipfilter:default
+
+# Clean up
+echo "* Cleaning up."
+rm /root/customize
+
+# Prepare image for provisioning
+sm-prepare-image -y
