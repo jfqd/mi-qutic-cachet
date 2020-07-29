@@ -26,6 +26,7 @@ for CONF_RM in ${HTTPD_CONF_RM}; do
 done
 
 echo "* Install Cachet"
+mkdir -p "${DESTDIR}"
 cd "${DESTDIR}"
 git clone https://github.com/cachethq/Cachet.git
 cd Cachet
