@@ -66,6 +66,7 @@ ln -nfs /var/svc/log/pkgsrc-proxysql:default.log /var/log/proxysql_log
 # Clean up
 echo "* Cleaning up."
 rm /root/customize
+mkdir -p /nonexistent
 
 # Prepare image for provisioning
 sm-prepare-image -y
