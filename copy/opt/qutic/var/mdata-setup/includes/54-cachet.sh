@@ -68,9 +68,15 @@ REDIS_PORT=null
 GITHUB_TOKEN=null
 EOF
 
+chmod 0640 .env
+chown -R www:www /var/www/htdocs/Cachet
+
 # install dependencies, create app-key and run migrations
-composer install --no-dev -o
-php artisan app:install
+sudo -u www composer install --no-dev -o || true
+sudo -u www php artisan app:install || true
+sudo -u www php artisan config:cache || true
+
+chown -R www:www /var/www/htdocs/Cachet
 
 # Enable apache by default
 /usr/sbin/svcadm enable svc:/pkgsrc/apache:default
