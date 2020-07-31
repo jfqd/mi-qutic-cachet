@@ -38,19 +38,26 @@ cat >> .env << EOF
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=${APP_URL}
+APP_TIMEZONE=UTC
 APP_KEY=${APP_KEY}
+DEBUGBAR_ENABLED=false
 
 DB_DRIVER=mysql
 DB_HOST=localhost
+DB_UNIX_SOCKET=null
 DB_DATABASE=${DB_DATABASE}
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
 DB_PORT=3306
+DB_PREFIX=null
 
 CACHE_DRIVER=apc
 SESSION_DRIVER=apc
 QUEUE_DRIVER=sync
+
+CACHET_BEACON=false
 CACHET_EMOJI=false
+CACHET_AUTO_TWITTER=false
 
 MAIL_DRIVER=smtp
 MAIL_HOST=${MAIL_HOST}
@@ -66,14 +73,22 @@ REDIS_DATABASE=null
 REDIS_PORT=null
 
 GITHUB_TOKEN=null
+
+NEXMO_KEY=null
+NEXMO_SECRET=null
+NEXMO_SMS_FROM=Cachet
+
+TRUSTED_PROXIES=
 EOF
 
 chmod 0640 .env
 chown -R www:www /var/www/htdocs/Cachet
 
 # install dependencies, create app-key and run migrations
-sudo -u www composer install --no-dev -o || true
-sudo -u www php artisan app:install || true
+composer install --no-dev -o || true
+chown -R www:www /var/www/htdocs/Cachet
+
+sudo -u www yes no | php artisan cachet:install || true
 sudo -u www php artisan config:cache || true
 
 chown -R www:www /var/www/htdocs/Cachet
