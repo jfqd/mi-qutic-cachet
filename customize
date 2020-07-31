@@ -5,7 +5,7 @@ PATH=/opt/local/gnu/bin:/opt/local/bin:/opt/local/sbin:/usr/bin:/usr/sbin
 # Exit if any command fail
 set -o errexit
 
-CACHET_VERSION="v2.3.18"
+CACHET_VERSION="master"
 DESTDIR="/var/www/htdocs"
 
 echo "* Remove unused httpd config files"
@@ -30,13 +30,14 @@ mkdir -p "${DESTDIR}"
 cd "${DESTDIR}"
 git clone https://github.com/cachethq/Cachet.git
 cd Cachet
-git checkout $CACHET_VERSION
+
+# checkout tag if not master
+if [[ $CACHET_VERSION != "master" ]]; then
+  git checkout $CACHET_VERSION
+fi
 
 echo "* Setup Cachet"
 chown -R www:www "$DESTDIR"
-
-echo "* Activate munin plugins"
-/opt/qutic/bin/munin-node-plugins ${MUNIN_PLUGINS}
 
 # Configuring image specific packages
 echo "* Configuring image specific packages.";
