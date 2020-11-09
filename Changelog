@@ -1,5 +1,11 @@
 # Changelog
 
+## 20191127.1
+
+* use latest base image
+* remove munin code
+* extend config and commands for v2.4
+
 ## 20191127.0
 
 * First release

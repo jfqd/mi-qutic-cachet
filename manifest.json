@@ -1,11 +1,11 @@
 {
   "name":         "qutic-cachet",
-  "version":      "20191127.0",
+  "version":      "20191127.1",
   "description":  "qutic cachet image",
   "organization": "qutic development",
   "brand":        "cachet instance",
   "homepage":     "https://github.com/jfqd/mi-qutic-cachet",
-  "base":         "21717cbc-56dd-11ea-b7a9-6732922efdd6",
+  "base":         "bbbdcfc0-200c-11eb-bf50-1bc722d57c54",
   "customer_metadata": {
     "admin_authorized_keys":        {"type": "text", "description": "SSH public authorized key(s) for the admin user"},
     "root_authorized_keys":         {"type": "text", "description": "SSH public authorized key(s) for the root user"},
