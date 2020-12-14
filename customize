@@ -32,9 +32,9 @@ git clone https://github.com/cachethq/Cachet.git
 cd Cachet
 
 # checkout tag if not master
-if [[ $CACHET_VERSION != "master" ]]; then
-  git checkout $CACHET_VERSION
-fi
+# if [[ $CACHET_VERSION != "master" ]]; then
+#   git checkout $CACHET_VERSION
+# fi
 
 echo "* Setup Cachet"
 chown -R www:www "$DESTDIR"
