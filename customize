@@ -38,6 +38,9 @@ cd Cachet
 
 echo "* Setup Cachet"
 chown -R www:www "$DESTDIR"
+sed -i \
+  -e "s|Disallow:|Disallow: /|" \
+  /var/www/htdocs/Cachet/public/robots.txt
 
 # Configuring image specific packages
 echo "* Configuring image specific packages.";
