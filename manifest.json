@@ -26,12 +26,6 @@
     "logstash_redis":               {"type": "text", "description": "ip addresses of the logstash redis nodes, seperated by comma and including redis-protocoll"},
     "vfstab":                       {"type": "text", "description": "nfs mountpoint for vfstab-file"},
     "server_name":                  {"type": "text", "description": "cachet server-name"},
-    "server_alias":                 {"type": "text", "description": "alias-name(s)"},
-    "proxysql_admin_pwd":           {"type": "text", "description": "proxysql admin password"},
-    "proxysql_monitor_pwd":         {"type": "text", "description": "proxysql monitor password"},
-    "proxysql_database_user":       {"type": "text", "description": "proxysql database user"},
-    "proxysql_database_pwd":        {"type": "text", "description": "proxysql database password"},
-    "percona_host":                 {"type": "text", "description": "percona host for proxysql"},
-    "percona_fallback_host":        {"type": "text", "description": "percona fallback host for proxysql"}
+    "server_alias":                 {"type": "text", "description": "alias-name(s)"}
   }
 }
