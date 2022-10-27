@@ -85,12 +85,12 @@ chmod 0640 .env
 chown -R www:www /var/www/htdocs/Cachet
 
 # install dependencies, create app-key and run migrations
-sudo -u www composer install --no-dev -o || true
+sudo -u www "yes no |composer install --no-dev -o" || true
 chown -R www:www /var/www/htdocs/Cachet
 
-sudo -u www yes no | php artisan cachet:install || true
-sudo -u www yes yes | php artisan key:generate || true
-sudo -u www php artisan config:cache || true
+sudo -u www "yes no | php artisan cachet:install" || true
+sudo -u www "yes yes | php artisan key:generate" || true
+sudo -u www "php artisan config:cache" || true
 
 chown -R www:www /var/www/htdocs/Cachet
 
