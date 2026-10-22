@@ -25,22 +25,31 @@ for CONF_RM in ${HTTPD_CONF_RM}; do
   rm -f /opt/local/etc/httpd/${CONF_RM}
 done
 
+# https://cachethq.io/docs/v3.x/installation
 echo "* Install Cachet"
 mkdir -p "${DESTDIR}"
 cd "${DESTDIR}"
-git clone https://github.com/cachethq/Cachet.git
-
-# checkout tag if not master
-# if [[ $CACHET_VERSION != "master" ]]; then
-#   cd Cachet
-#   git checkout $CACHET_VERSION
-# fi
+git clone -b 3.x https://github.com/cachethq/cachet.git
 
 echo "* Setup Cachet"
-chown -R www:www "$DESTDIR"
+chown -R www:www /var/www/htdocs/cachet/storage
 sed -i \
   -e "s|Disallow:|Disallow: /|" \
-  /var/www/htdocs/Cachet/public/robots.txt
+  /var/www/htdocs/cachet/public/robots.txt
+
+(
+  cd /var/www/htdocs/cachet
+  yes | composer install --no-dev -o
+  yes | composer update cachethq/core
+  cp .env.example .env
+  php artisan key:generate
+  php artisan vendor:publish --tag=cachet
+  # php artisan migrate
+  chown -R www:www .
+  # php artisan queue:work &
+)
+  
+# * * * * * php artisan schedule:run >> /dev/null 2>&1
 
 # Configuring image specific packages
 echo "* Configuring image specific packages.";
