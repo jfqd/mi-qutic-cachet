@@ -32,24 +32,10 @@ cd "${DESTDIR}"
 git clone -b 3.x https://github.com/cachethq/cachet.git
 
 echo "* Setup Cachet"
-chown -R www:www /var/www/htdocs/cachet/storage
+chown -R www:www /var/www/htdocs/cachet
 sed -i \
   -e "s|Disallow:|Disallow: /|" \
   /var/www/htdocs/cachet/public/robots.txt
-
-(
-  cd /var/www/htdocs/cachet
-  yes | composer install --no-dev -o
-  yes | composer update cachethq/core
-  cp .env.example .env
-  php artisan key:generate
-  php artisan vendor:publish --tag=cachet
-  # php artisan migrate
-  chown -R www:www .
-  # php artisan queue:work &
-)
-  
-# * * * * * php artisan schedule:run >> /dev/null 2>&1
 
 # Configuring image specific packages
 echo "* Configuring image specific packages.";

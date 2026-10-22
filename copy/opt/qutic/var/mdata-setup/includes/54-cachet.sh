@@ -15,19 +15,25 @@ else
 fi
 
 # setup env-file
-cd /var/www/htdocs/Cachet
+cd /var/www/htdocs/cachet
 
 APP_URL="https://${SERVER_NAME}"
 APP_KEY=$(php artisan key:generate)
 
 if mdata-get proxysql_database 1>/dev/null 2>&1; then
-  DB_DATABASE=`mdata-get proxysql_database`
+  DB_HOST=`mdata-get database_host`
+else
+  DB_HOST="127.0.0.1"
+fi
+
+if mdata-get proxysql_database 1>/dev/null 2>&1; then
+  DB_DATABASE=`mdata-get database_name`
 else
   DB_DATABASE="cachet"
 fi
 
-DB_USERNAME=`mdata-get proxysql_database_user`
-DB_PASSWORD=`mdata-get proxysql_database_pwd`
+DB_USERNAME=`mdata-get database_user`
+DB_PASSWORD=`mdata-get database_pwd`
 
 MAIL_HOST=$(mdata-get mail_smarthost)
 MAIL_USERNAME=$(mdata-get mail_auth_user)
@@ -35,15 +41,29 @@ MAIL_PASSWORD=$(mdata-get mail_auth_pass)
 MAIL_ADDRESS=$(mdata-get mail_adminaddr)
 
 cat >> .env << EOF
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=${APP_URL}
-APP_TIMEZONE=UTC
+APP_NAME=Cachet
+APP_ENV=local
 APP_KEY=${APP_KEY}
-DEBUGBAR_ENABLED=false
+APP_DEBUG=true
+APP_TIMEZONE=UTC
+APP_URL=${APP_URL}
 
-DB_DRIVER=mysql
-DB_HOST=localhost
+APP_LOCALE=de
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=${DB_HOST}
 DB_UNIX_SOCKET=null
 DB_DATABASE=${DB_DATABASE}
 DB_USERNAME=${DB_USERNAME}
@@ -51,48 +71,67 @@ DB_PASSWORD=${DB_PASSWORD}
 DB_PORT=3306
 DB_PREFIX=null
 
-CACHE_DRIVER=apc
-SESSION_DRIVER=apc
-QUEUE_DRIVER=sync
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_HOST=mail.qutic.com
+MAIL_PORT=587
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_FROM_ADDRESS=${MAIL_ADDRESS}
+MAIL_FROM_NAME="Status Page"
+MAIL_ENCRYPTION=tls
+
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
 
 CACHET_BEACON=false
 CACHET_EMOJI=false
 CACHET_AUTO_TWITTER=false
+CACHET_PATH=/
+CACHET_TRUSTED_PROXIES=""
 
-MAIL_DRIVER=smtp
-MAIL_HOST=${MAIL_HOST}
-MAIL_PORT=587
-MAIL_USERNAME=${MAIL_USERNAME}
-MAIL_PASSWORD=${MAIL_PASSWORD}
-MAIL_ADDRESS=${MAIL_ADDRESS}
-MAIL_NAME="Status Page"
-MAIL_ENCRYPTION=tls
-
-REDIS_HOST=null
-REDIS_DATABASE=null
-REDIS_PORT=null
-
-GITHUB_TOKEN=null
-
-NEXMO_KEY=null
-NEXMO_SECRET=null
-NEXMO_SMS_FROM=Cachet
-
-TRUSTED_PROXIES=
+NIGHTWATCH_ENABLED=false
 EOF
 
 chmod 0640 .env
-chown -R www:www /var/www/htdocs/Cachet
+chown -R www:www /var/www/htdocs/cachet
 
 # install dependencies, create app-key and run migrations
 sudo -u www "yes no |composer install --no-dev -o" || true
-chown -R www:www /var/www/htdocs/Cachet
+sudo -u www "yes | composer update cachethq/core"  || true
+chown -R www:www /var/www/htdocs/cachet
 
-sudo -u www "yes no | php artisan cachet:install" || true
-sudo -u www "yes yes | php artisan key:generate" || true
-sudo -u www "php artisan config:cache" || true
+sudo -u www "php artisan vendor:publish --tag=cachet" || true
+sudo -u www "php artisan migrate" || true
 
-chown -R www:www /var/www/htdocs/Cachet
+chown -R www:www /var/www/htdocs/cachet
+
+# * * * * * php artisan schedule:run >> /dev/null 2>&1
 
 # Enable apache by default
 /usr/sbin/svcadm enable svc:/pkgsrc/apache:default
